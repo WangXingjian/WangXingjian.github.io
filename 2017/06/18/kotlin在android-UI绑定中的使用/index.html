@@ -1,0 +1,722 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Monda:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="作为一个android开发者，刚刚学习kotlin，往往格外关注其在已有android体系下的应用效果。这篇文章，主要分享一下自己学习kotlin有关UI绑定的技巧。 Kotlin Android Extensions说实话，我本人第一次接触这个东西还是有点不习惯。然而，从现代语言精简代码量的角度想，Kotlin Android Extensions势必将成为以后的趋势。 话不多说，如果你想在自己">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kotlin在android UI绑定中的使用">
+<meta property="og:url" content="http://yoursite.com/2017/06/18/kotlin在android-UI绑定中的使用/index.html">
+<meta property="og:site_name" content="Rocinante的Blog">
+<meta property="og:description" content="作为一个android开发者，刚刚学习kotlin，往往格外关注其在已有android体系下的应用效果。这篇文章，主要分享一下自己学习kotlin有关UI绑定的技巧。 Kotlin Android Extensions说实话，我本人第一次接触这个东西还是有点不习惯。然而，从现代语言精简代码量的角度想，Kotlin Android Extensions势必将成为以后的趋势。 话不多说，如果你想在自己">
+<meta property="og:updated_time" content="2017-06-18T09:11:14.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="kotlin在android UI绑定中的使用">
+<meta name="twitter:description" content="作为一个android开发者，刚刚学习kotlin，往往格外关注其在已有android体系下的应用效果。这篇文章，主要分享一下自己学习kotlin有关UI绑定的技巧。 Kotlin Android Extensions说实话，我本人第一次接触这个东西还是有点不习惯。然而，从现代语言精简代码量的角度想，Kotlin Android Extensions势必将成为以后的趋势。 话不多说，如果你想在自己">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/06/18/kotlin在android-UI绑定中的使用/"/>
+
+
+
+
+
+  <title>kotlin在android UI绑定中的使用 | Rocinante的Blog</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Rocinante的Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">传过县界长长的隧道，便是雪国。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/06/18/kotlin在android-UI绑定中的使用/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Rocinante">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/wxj.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Rocinante的Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">kotlin在android UI绑定中的使用</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-18T15:10:22+08:00">
+                2017-06-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>作为一个android开发者，刚刚学习kotlin，往往格外关注其在已有android体系下的应用效果。这篇文章，主要分享一下自己学习kotlin有关UI绑定的技巧。</p>
+<h2 id="Kotlin-Android-Extensions"><a href="#Kotlin-Android-Extensions" class="headerlink" title="Kotlin Android Extensions"></a>Kotlin Android Extensions</h2><p>说实话，我本人第一次接触这个东西还是有点不习惯。然而，从现代语言精简代码量的角度想，<a href="https://kotlinlang.org/docs/tutorials/android-plugin.html" target="_blank" rel="external">Kotlin Android Extensions</a>势必将成为以后的趋势。</p>
+<p>话不多说，如果你想在自己的代码中使用Kotlin Android Extensions，首先需要在项目的<code>build.gradle</code>中添加以下依赖：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">buldscript&#123;</div><div class="line">	repositories &#123;</div><div class="line">		jcenter()</div><div class="line">	&#125;</div><div class="line">	dependencies &#123;</div><div class="line">		classpath <span class="string">"org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"</span></div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>紧接着，在<code>Activty</code>或者<code>Fragment</code>中，我们需要利用<code>import</code>的形式将<code>UI Layout</code>绑定进来：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> kotlinx.android.synthetic.activity_demo.*</div></pre></td></tr></table></figure>
+<p>至此，<code>DemoActivity</code>所对应layout中的所有view的绑定就完成了。<br>在<code>setContentView()</code>之后，你便可以通过XML中为每个<code>view／viewgroup</code>设定的id去访问相应对象。</p>
+<p>需要注意的是，如果你的XML文件中存在<code>&lt;include&gt;</code>标签，那么上面的<code>import</code>还不足以绑定你所include的布局文件，你需要对该文件单独<code>import</code>。</p>
+<h2 id="传统绑定方式"><a href="#传统绑定方式" class="headerlink" title="传统绑定方式"></a>传统绑定方式</h2><p>相信有不少同学和我一样，最开始学习或者使用kotlin来编写android代码时，会利用auto converter将Java代码自动转换成kotlin代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DemoActivity</span> <span class="keyword">extends</span> <span class="title">AppCompatActivity</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> Button btn;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState);</div><div class="line">        setContentView(R.layout.activity_demo);</div><div class="line"></div><div class="line">        btn = (Button) findViewById(R.id.btn);</div><div class="line"></div><div class="line">        btn.setText(<span class="string">"btn"</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">DemoActivity</span> : <span class="type">AppCompatActivity</span></span>() &#123;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">var</span> btn: Button? = <span class="literal">null</span></div><div class="line"></div><div class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</div><div class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState)</div><div class="line">        setContentView(R.layout.activity_demo)</div><div class="line"></div><div class="line">        btn = findViewById(R.id.btn) <span class="keyword">as</span> Button</div><div class="line"></div><div class="line">        btn!!.text = <span class="string">"btn"</span></div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>第一次转换的时候，一定有很多同学和我有一样的疑惑，<code>btn</code>引用对象后面的双感叹号是什么东西？让我们试着将这碍眼的符号去掉试试：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Smart cast to <span class="string">'Button'</span> is impossible, because <span class="string">'btn'</span> is a mutable property that could have been changed by <span class="keyword">this</span> time</div></pre></td></tr></table></figure>
+<p>编译报错，这是怎么回事呢？</p>
+<p>首先，要回答这个问题，就要从kotlin与Java的一大差别说起 —— <strong>空安全</strong>。<br>有过Java开发经验的同学都知道，<strong>NullPointerException</strong>是一个极度令人头疼的问题，为了handle这个问题，我们往往需要对一条语句要做多层<code>if</code>空校验。这时的代码会显得非常冗余。现代语言中对<strong>空指针</strong>的处理往往优于Java，在kotlin中，严格规定变量是否可空，和尽早在编译器指出可能存在的<strong>空指针</strong>隐患，都极大提高了代码质量。具体可参考<a href="https://wangjiegulu.gitbooks.io/kotlin-for-android-developers-zh/content/ke_null_lei_xing_zen_yao_gong_zuo.html" target="_blank" rel="external">gitbook</a>。</p>
+<p>回到我们的问题上来，在从Java转换到kotlin的时候，我们注意到，变量btn的声明发生了变化：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">private</span> <span class="keyword">var</span> btn: Button? = <span class="literal">null</span></div></pre></td></tr></table></figure>
+<p>这表明<code>btn</code>是一个可null变量。注意，这里无论<code>btn</code>是否可null，我们都需要初始化它。</p>
+<p><strong>Button？</strong>类型提醒编译器，在之后的代码中，如果要直接使用<code>btn</code>，都需要进行空校验。那么有没有简化代码的方法呢？当然有:</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">btn?.text = <span class="string">"btn"</span><span class="comment">// method 1</span></div><div class="line">btn!!.text = <span class="string">"btn"</span><span class="comment">// method 2</span></div></pre></td></tr></table></figure>
+<p>这里的第一句代码会告诉编译器，变量<code>btn？</code>如果为空，则不执行该行代码。这也从根本上防止了<strong>空指针异常</strong>的出现。似乎解决问题了，那么第二个，也就是我们通过auto converter得到的形式又是什么意思呢？</p>
+<p>这里需要说明，由于我们在上文明确通过<code>findViewById()</code>给予了<code>btn</code>一个非空对象（至少在编译器不可测），因此，虽然<code>btn</code>本身可空，但是我们此时就可以利用双感叹号跳过编译器空检查了（注意，auto converter可以帮助你比较Java和kotlin的异同，但它从来不会保证你的代码质量，因此双感叹号的用法，是有机会带来空指针异常的）。</p>
+<p>至此，我们终于理解了<code>btn!!.text = &quot;btn&quot;</code>双感叹号的含义，然而，如果满屏都是这样的符号，代码依旧会显得非常丑陋，而很明显，这里的<code>btn</code>事实上并不需要做这么多空检查相关操作，因此，有没有办法使得代码更加优雅呢？</p>
+<p>我下意识地反应就是，在编译器明确指定变量<code>btn</code>不可空：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">private</span> <span class="keyword">var</span> btn: Button</div></pre></td></tr></table></figure>
+<p>可是别忘了，我们需要在声明不可空变量时初始化它，因此代码应该是这样：<br><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">private</span> <span class="keyword">var</span> btn: Button = findViewById(R.id.btn) <span class="keyword">as</span> Button</div></pre></td></tr></table></figure></p>
+<p>那么问题又来了，这段话虽然编译不会报错，但是我们都知道，在<code>setContentView()</code>之前调用<code>findViewById()</code>方法是不行的。<br>这就陷入了矛盾之中，难道没有更好的解决办法吗？</p>
+<p>上周我将这个问题放到了[stackoverflow] (<a href="https://stackoverflow.com/questions/44450816/nullpointerexception-in-kotlin)上，果然得到了满意的答案。也怪自己看文档不够仔细，遇到以上情况，也就是需要在类内声明不可空变量，然后在之后的方法中初始化它们的情况，我们其实可以用kotlin关键字``lateinit``修饰变量" target="_blank" rel="external">https://stackoverflow.com/questions/44450816/nullpointerexception-in-kotlin)上，果然得到了满意的答案。也怪自己看文档不够仔细，遇到以上情况，也就是需要在类内声明不可空变量，然后在之后的方法中初始化它们的情况，我们其实可以用kotlin关键字``lateinit``修饰变量</a>:</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> btn : Button</div><div class="line">   <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</div><div class="line">       <span class="keyword">super</span>.onCreate(savedInstanceState)</div><div class="line">       setContentView(R.layout.activity_demo)</div><div class="line">       btn = findViewById(R.id.btn) <span class="keyword">as</span> Button</div><div class="line">       btn.text = <span class="string">"btn"</span></div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<p>这样的代码看得那叫一个舒心，<code>lateinit</code>有点像一个逻辑稍有不同的简化版<strong>懒加载</strong>，不过需要注意的是，使用<code>lateinit</code>关键字，虽然避免了初始化紧跟声明和冗余空校验的问题，但是如果你的代码稍有问题，如没有初始化就使用变量，那么一样会导致另一个报错：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">kotlin.UninitializedPropertyAccessException: lateinit property btn has not been initialized</div></pre></td></tr></table></figure>
+<p>这个应该很好理解。<br>因此，在我看来，<code>lateinit</code>关键字也不是万能的，不过在以传统方式绑定UI这方面，由于错误极易排查，因此这样使用并不需要注意太多问题。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/06/16/mdexe/" rel="next" title="mdexe">
+                <i class="fa fa-chevron-left"></i> mdexe
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/wxj.jpg"
+               alt="Rocinante" />
+          <p class="site-author-name" itemprop="name">Rocinante</p>
+           
+              <p class="site-description motion-element" itemprop="description">app前端 Java kotlin swift</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/WangXingjian" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Kotlin-Android-Extensions"><span class="nav-number">1.</span> <span class="nav-text">Kotlin Android Extensions</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#传统绑定方式"><span class="nav-number">2.</span> <span class="nav-text">传统绑定方式</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Rocinante</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
