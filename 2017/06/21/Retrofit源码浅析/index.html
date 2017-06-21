@@ -1,0 +1,758 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+
+  
+    
+      
+    
+
+    
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Monda:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="Retrofit 是Square出品的android网络访问框架，相信很多同学对它都不陌生。事实上，Retrofit是对Square另一个更出名的网络框架——OKHttp 的炫酷封装，由大神 JakeWharton 主持开发。今天，我就把自己对 Retrofit2 源码的一些简单解读记录下来，供自己以后复习。 官方Demo首先先贴出一个本人稍作修改的官网demo，在之后的源码解读中，我会经常跳回这">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Retrofit源码浅析">
+<meta property="og:url" content="http://yoursite.com/2017/06/21/Retrofit源码浅析/index.html">
+<meta property="og:site_name" content="Rocinante的Blog">
+<meta property="og:description" content="Retrofit 是Square出品的android网络访问框架，相信很多同学对它都不陌生。事实上，Retrofit是对Square另一个更出名的网络框架——OKHttp 的炫酷封装，由大神 JakeWharton 主持开发。今天，我就把自己对 Retrofit2 源码的一些简单解读记录下来，供自己以后复习。 官方Demo首先先贴出一个本人稍作修改的官网demo，在之后的源码解读中，我会经常跳回这">
+<meta property="og:updated_time" content="2017-06-21T11:41:33.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Retrofit源码浅析">
+<meta name="twitter:description" content="Retrofit 是Square出品的android网络访问框架，相信很多同学对它都不陌生。事实上，Retrofit是对Square另一个更出名的网络框架——OKHttp 的炫酷封装，由大神 JakeWharton 主持开发。今天，我就把自己对 Retrofit2 源码的一些简单解读记录下来，供自己以后复习。 官方Demo首先先贴出一个本人稍作修改的官网demo，在之后的源码解读中，我会经常跳回这">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":true,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/06/21/Retrofit源码浅析/"/>
+
+
+
+
+
+  <title>Retrofit源码浅析 | Rocinante的Blog</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Rocinante的Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">传过县界长长的隧道，便是雪国。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/06/21/Retrofit源码浅析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Rocinante">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/wxj.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Rocinante的Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Retrofit源码浅析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-21T11:17:41+08:00">
+                2017-06-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><strong>Retrofit</strong> 是Square出品的android网络访问框架，相信很多同学对它都不陌生。事实上，Retrofit是对Square另一个更出名的网络框架——<a href="https://github.com/square/okhttp" target="_blank" rel="external">OKHttp</a> 的炫酷封装，由大神 <a href="https://github.com/JakeWharton" target="_blank" rel="external">JakeWharton</a> 主持开发。今天，我就把自己对 <strong>Retrofit2</strong> 源码的一些简单解读记录下来，供自己以后复习。</p>
+<h2 id="官方Demo"><a href="#官方Demo" class="headerlink" title="官方Demo"></a>官方Demo</h2><p>首先先贴出一个本人稍作修改的官网demo，在之后的源码解读中，我会经常跳回这个demo进行分析。</p>
+<p><strong>HTTP API 接口：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">GitHubService</span> </span>&#123;</div><div class="line">  <span class="meta">@GET</span>(<span class="string">"users/&#123;user&#125;/repos"</span>)</div><div class="line">  Observable&lt;List&lt;Repo&gt;&gt; listRepos(<span class="meta">@Path</span>(<span class="string">"user"</span>) String user);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><strong>Retrofit Builder:</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Retrofit  retrofit = <span class="keyword">new</span> Retrofit.Builder()</div><div class="line">                .addConverterFactory(GsonConverterFactory.create())<span class="comment">//添加Gson作为序列化工具</span></div><div class="line">                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())<span class="comment">//添加RxJava Adapter</span></div><div class="line">                .baseUrl(<span class="string">"your API host"</span>)</div><div class="line">                .build();</div></pre></td></tr></table></figure>
+<p><strong>制作一条请求：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">GitHubService service = retrofit.create(GitHubService.class);</div><div class="line"><span class="comment">/**</span></div><div class="line">*官网demo中，接口方法返回的是Call&lt;?&gt;，这里由于我将顺带讲到RxJava与Retrofit的</div><div class="line">联合使用，所以将返回类型改为Observable，对RxJava有所了解的同学应该明白，此处得</div><div class="line">到一个可观察对象后(事实上，retrofit将一个OKHttpCall转换为了Observable),便可</div><div class="line">以利用subscribe()方法，编写observer回调函数了。</div><div class="line">*/</div><div class="line">Observable&lt;List&lt;Repo&gt;&gt; observable = service.listRepos(<span class="string">"octocat"</span>);</div></pre></td></tr></table></figure>
+<p>如果有不太明白这个demo的同学，请移步 <a href="http://square.github.io/retrofit/" target="_blank" rel="external">Retrofit官网</a>。</p>
+<h2 id="Retrofit伪动态代理"><a href="#Retrofit伪动态代理" class="headerlink" title="Retrofit伪动态代理"></a>Retrofit伪动态代理</h2><p><a href="http://www.cnblogs.com/huhx/p/dynamicTheoryAdvance.html" target="_blank" rel="external">动态代理</a> 是代理模式中的一种。网上很多文章都提到，Retrofit的接口封装HTTP API及隐藏OKHttp对网络请求的具体实现逻辑，就是利用的动态代理模式。然而，事实上，Retrofit利用的仅仅是动态代理的一个壳子，它在具体实现上与典型的动态代理有着根本的区别。</p>
+<p>首先回到我们的 <strong>Demo</strong>，接口<code>GitHubService</code>事实上就是被代理类接口。它声明了一个<code>listRepos()</code>方法。然而 <strong>Demo</strong> 中我们并不用去实现这个接口，对动态代理熟悉的同学此时可能已经发现有些蹊跷，没有被代理类，如何利用 <strong>Proxy</strong> 去<code>invoke</code>被代理类的指定方法呢？别急，我们再往下看。</p>
+<p><strong>Retrofit Builder</strong> 建造了一个 <strong>Retrofit</strong> 对象，这里很简单，利用了<code>Builder</code>内部类形式的建造模式。<strong>建造模式</strong> 适用于初始化对象时需要大量可选方法的的情况，在android中有着广泛的使用。我在方法链中加入两个添加特定 <strong>Factory</strong> 的方法，之后会作讨论。</p>
+<p>好了接下来就是本节的关键——利用<code>Retrofit.create()</code>方法创建一个<code>GitHubService</code>对象，我们先来看下<code>create()</code>方法的源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> &lt;T&gt; <span class="function">T <span class="title">create</span><span class="params">(<span class="keyword">final</span> Class&lt;T&gt; service)</span> </span>&#123;</div><div class="line">    Utils.validateServiceInterface(service);</div><div class="line">    <span class="keyword">if</span> (validateEagerly) &#123;</div><div class="line">      eagerlyValidateMethods(service);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> (T) Proxy.newProxyInstance(service.getClassLoader(), <span class="keyword">new</span> Class&lt;?&gt;[] &#123; service &#125;,</div><div class="line">        <span class="keyword">new</span> InvocationHandler() &#123;</div><div class="line">          <span class="keyword">private</span> <span class="keyword">final</span> Platform platform = Platform.get();</div><div class="line"></div><div class="line">          <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object proxy, Method method, Object... args)</span></span></div><div class="line">              <span class="keyword">throws</span> Throwable &#123;</div><div class="line">            <span class="comment">// If the method is a method from Object then defer to normal invocation.</span></div><div class="line">            <span class="keyword">if</span> (method.getDeclaringClass() == Object.class) &#123;</div><div class="line">              <span class="keyword">return</span> method.invoke(<span class="keyword">this</span>, args);</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">if</span> (platform.isDefaultMethod(method)) &#123;</div><div class="line">              <span class="keyword">return</span> platform.invokeDefaultMethod(method, service, proxy, args);</div><div class="line">            &#125;</div><div class="line">            ServiceMethod serviceMethod = loadServiceMethod(method);</div><div class="line">            OkHttpCall okHttpCall = <span class="keyword">new</span> OkHttpCall&lt;&gt;(serviceMethod, args);</div><div class="line">            <span class="keyword">return</span> serviceMethod.callAdapter.adapt(okHttpCall);</div><div class="line">          &#125;</div><div class="line">        &#125;);</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<p>第二行<code>Utils.validateServiceInterface(service)</code>对我们传入的 <strong>interface</strong> 做了检查，首先判断其是否为一个 <strong>interface</strong> ，其次，与传统动态代理不同的是，这里Retrofit还需要我们的 <strong>interface</strong> 不再继承自任何其他接口。</p>
+<p>第四行<code>eagerlyValidateMethods(service)</code>强制load接口中所有方法，布尔值<code>validateEagerly</code>默认为 <strong>false</strong>。</p>
+<p>第六行，终于来到了我们熟悉的<code>Proxy.newProxyInstance()</code>方法，这也是动态代理的核心所在，第一个参数是我们接口的类加载器，第二个参数为接口列表，第三个顾名思义是一个回调接口——它只定义了一个方法<code>invoke()</code>。</p>
+<p>再来看<code>invoke()</code>方法，其第一个参数为代理类对象，第二个参数是通过反射获得的类方法对象，第三个是个类方法的一组参数，我们知道，传统的动态代理，需要在这个方法中手动 <strong>invoke</strong> 被代理类方法:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span> <span class="keyword">throws</span> Throwable </span>&#123;</div><div class="line">                        System.out.println(<span class="string">"before\n"</span>);</div><div class="line">                        <span class="comment">//根据代理类invoke</span></div><div class="line">                        method.invoke(retrofit, args);</div><div class="line">                        System.out.printf(<span class="string">"after \n"</span>);</div><div class="line">                        <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">                    &#125;</div></pre></td></tr></table></figure>
+<p>第五行我们可以看到，<code>method.invoke()</code>方法会根据参数 <strong>invoke</strong> 对应类方法，这里 <strong>retrofit</strong> 是我们假设的一个被代理类对象，其理论上应该继承自 <strong>Demo</strong> 中的 <code>GitHubService</code>，在此之后，利用返回的<code>GitHubService</code>对象，我们即可以直接调用其子类的 <strong>被重写方法</strong> 了。注意，<code>InvocationHandler.invoke()</code>方法是在接口对象调用方法后被调用。</p>
+<p>再回到Retrofit的代码中，与传统动态代理比较，不难发现，我们并没有得到被代理类对象(因为我们压根儿没有定义<code>GitHubService</code>的实现类),更别提去<code>invoke()</code>其方法了，那么这里的<code>InvocationHandler.invoke()</code>究竟做了什么呢？答案就在代码第十九行：</p>
+<p><code>ServiceMethod serviceMethod = loadServiceMethod(method);</code></p>
+<p>我们点进 <code>loadServiceMethod()</code>方法看看：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="function">ServiceMethod <span class="title">loadServiceMethod</span><span class="params">(Method method)</span> </span>&#123;</div><div class="line">    ServiceMethod result;</div><div class="line">    <span class="keyword">synchronized</span> (serviceMethodCache) &#123;</div><div class="line">      result = serviceMethodCache.get(method);</div><div class="line">      <span class="keyword">if</span> (result == <span class="keyword">null</span>) &#123;</div><div class="line">        result = <span class="keyword">new</span> ServiceMethod.Builder(<span class="keyword">this</span>, method).build();</div><div class="line">        serviceMethodCache.put(method, result);</div><div class="line">      &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> result;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<p>此处，<code>serviceMethodCache</code>是一个 <strong>LinkedHashMap</strong>，不难看出，这里利用享元模式做了一个<code>ServiceMethod</code>享元池，话不多说，如果池中没有对应对象，我们就新建一个加入池，点击<code>ServiceMethod.Builder</code>再看：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">Builder</span><span class="params">(Retrofit retrofit, Method method)</span> </span>&#123;</div><div class="line">      <span class="keyword">this</span>.retrofit = retrofit;</div><div class="line">      <span class="keyword">this</span>.method = method;</div><div class="line">      <span class="keyword">this</span>.methodAnnotations = method.getAnnotations();</div><div class="line">      <span class="keyword">this</span>.parameterTypes = method.getGenericParameterTypes();</div><div class="line">      <span class="keyword">this</span>.parameterAnnotationsArray = method.getParameterAnnotations();</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p><code>ServiceMethod</code>类对象同样通过内置Builder建造，注意四五六这三行代码，<code>ServiceMethod</code>储存了<code>method</code>的方法注解表、参数表以及参数注解表。是不是有些头绪了呢？回到 <strong>Demo</strong> 中的 <strong>HTTP API 接口</strong> <code>listRepos()</code>方法，当此方法通过<code>GitHubService</code>对象被调用时(<code>InvocationHandler.invoke()</code>方法随即被调用)，Retrofit关心的根本不是它的实现，而是它的方法注解表、参数表以及参数注解表。这也正是我所说的，Retrofit伪动态代理的原理，利用动态代理的壳子，得到了自己真正想要的东西。</p>
+<h2 id="隐藏OKHttp-Call组装过程"><a href="#隐藏OKHttp-Call组装过程" class="headerlink" title="隐藏OKHttp Call组装过程"></a>隐藏OKHttp Call组装过程</h2><p>既然焦点落到了<code>listRepos()</code>方法，我们不妨将它单独拎出来看看：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@GET</span>(<span class="string">"users/&#123;user&#125;/repos"</span>)</div><div class="line">Observable&lt;List&lt;Repo&gt;&gt; listRepos(<span class="meta">@Path</span>(<span class="string">"user"</span>) String user);</div></pre></td></tr></table></figure>
+<p>首先是方法注解，有理由推断，这是一个GET请求，API为 <strong>users/{user}/repos</strong>，其中{user}是一个动态路径。其次是返回值，<strong>Observable</strong> 暂不多说，其范型想必就是反序列化后得到的POJO类List了。最后是参数，参数注解 <strong>Path</strong> 表明这里的String将会填充到API中，我们同样可以利用 <strong>Body</strong> 注解表明参数是 <strong>Post</strong> 请求中的body体。</p>
+<p>为了求证我们的猜想，我以方法注解为例看一看源码，首先根据上文<code>methodAnnotations</code>查找它的调用地点，最后定位到这个方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">parseMethodAnnotation</span><span class="params">(Annotation annotation)</span> </span>&#123;</div><div class="line">      <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> DELETE) &#123;</div><div class="line">        parseHttpMethodAndPath(<span class="string">"DELETE"</span>, ((DELETE) annotation).value(), <span class="keyword">false</span>);</div><div class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> GET) &#123;</div><div class="line">        parseHttpMethodAndPath(<span class="string">"GET"</span>, ((GET) annotation).value(), <span class="keyword">false</span>);</div><div class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> HEAD) &#123;</div><div class="line">        parseHttpMethodAndPath(<span class="string">"HEAD"</span>, ((HEAD) annotation).value(), <span class="keyword">false</span>);</div><div class="line">        <span class="keyword">if</span> (!Void.class.equals(responseType)) &#123;</div><div class="line">          <span class="keyword">throw</span> methodError(<span class="string">"HEAD method must use Void as response type."</span>);</div><div class="line">        &#125;</div><div class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> PATCH) &#123;</div><div class="line">        parseHttpMethodAndPath(<span class="string">"PATCH"</span>, ((PATCH) annotation).value(), <span class="keyword">true</span>);</div><div class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> POST) &#123;</div><div class="line">        parseHttpMethodAndPath(<span class="string">"POST"</span>, ((POST) annotation).value(), <span class="keyword">true</span>);</div><div class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> PUT) &#123;</div><div class="line">        parseHttpMethodAndPath(<span class="string">"PUT"</span>, ((PUT) annotation).value(), <span class="keyword">true</span>);</div><div class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> OPTIONS) &#123;</div><div class="line">        parseHttpMethodAndPath(<span class="string">"OPTIONS"</span>, ((OPTIONS) annotation).value(), <span class="keyword">false</span>);</div><div class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> HTTP) &#123;</div><div class="line">        HTTP http = (HTTP) annotation;</div><div class="line">        parseHttpMethodAndPath(http.method(), http.path(), http.hasBody());</div><div class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> retrofit2.http.Headers) &#123;</div><div class="line">        String[] headersToParse = ((retrofit2.http.Headers) annotation).value();</div><div class="line">        <span class="keyword">if</span> (headersToParse.length == <span class="number">0</span>) &#123;</div><div class="line">          <span class="keyword">throw</span> methodError(<span class="string">"@Headers annotation is empty."</span>);</div><div class="line">        &#125;</div><div class="line">        headers = parseHeaders(headersToParse);</div><div class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> Multipart) &#123;</div><div class="line">        <span class="keyword">if</span> (isFormEncoded) &#123;</div><div class="line">          <span class="keyword">throw</span> methodError(<span class="string">"Only one encoding annotation is allowed."</span>);</div><div class="line">        &#125;</div><div class="line">        isMultipart = <span class="keyword">true</span>;</div><div class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> FormUrlEncoded) &#123;</div><div class="line">        <span class="keyword">if</span> (isMultipart) &#123;</div><div class="line">          <span class="keyword">throw</span> methodError(<span class="string">"Only one encoding annotation is allowed."</span>);</div><div class="line">        &#125;</div><div class="line">        isFormEncoded = <span class="keyword">true</span>;</div><div class="line">      &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p>这里我省略了一个迭代<code>methodAnnotations</code>数组的 <strong>for-each</strong>，反正<code>methodAnnotations</code>中的每一个注解，都会被传入上面的<code>parseMethodAnnotation</code>方法。</p>
+<p>这段代码不难理解，针对每一个HTTP请求类型，都会有一个注解与之对应，这里我想说的是，即便是大神，面对Java冗长的语法，也只能写得如此不优雅了，难怪JakeWharton如此推崇Kotlin，这里一个 <strong>when</strong> 语句，不知高到哪里去了。</p>
+<p>再看每个 <strong>if</strong> 语句中调用的<code>parseHttpMethodAndPath()</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">parseHttpMethodAndPath</span><span class="params">(String httpMethod, String value, <span class="keyword">boolean</span> hasBody)</span> </span>&#123;</div><div class="line">      <span class="keyword">if</span> (<span class="keyword">this</span>.httpMethod != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">throw</span> methodError(<span class="string">"Only one HTTP method is allowed. Found: %s and %s."</span>,</div><div class="line">            <span class="keyword">this</span>.httpMethod, httpMethod);</div><div class="line">      &#125;</div><div class="line">      <span class="keyword">this</span>.httpMethod = httpMethod;</div><div class="line">      <span class="keyword">this</span>.hasBody = hasBody;</div><div class="line"></div><div class="line">      <span class="keyword">if</span> (value.isEmpty()) &#123;</div><div class="line">        <span class="keyword">return</span>;</div><div class="line">      &#125;</div><div class="line"></div><div class="line">      <span class="comment">// Get the relative URL path and existing query string, if present.</span></div><div class="line">      <span class="keyword">int</span> question = value.indexOf(<span class="string">'?'</span>);</div><div class="line">      <span class="keyword">if</span> (question != -<span class="number">1</span> &amp;&amp; question &lt; value.length() - <span class="number">1</span>) &#123;</div><div class="line">        <span class="comment">// Ensure the query string does not have any named parameters.</span></div><div class="line">        String queryParams = value.substring(question + <span class="number">1</span>);</div><div class="line">        Matcher queryParamMatcher = PARAM_URL_REGEX.matcher(queryParams);</div><div class="line">        <span class="keyword">if</span> (queryParamMatcher.find()) &#123;</div><div class="line">          <span class="keyword">throw</span> methodError(<span class="string">"URL query string \"%s\" must not have replace block. "</span></div><div class="line">              + <span class="string">"For dynamic query parameters use @Query."</span>, queryParams);</div><div class="line">        &#125;</div><div class="line">      &#125;</div><div class="line"></div><div class="line">      <span class="keyword">this</span>.relativeUrl = value;</div><div class="line">      <span class="keyword">this</span>.relativeUrlParamNames = parsePathParameters(value);</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p>这里也不难理解，<code>value</code>拿到的是注解内容，即我们前面说的API路径，value为空就直接返回了，不为空则会对其做一些正则检查，确定路径合法性。</p>
+<p>同样的，<code>listRepos</code>中的其他信息也会被一一解析并储存在<code>ServiceMethod</code>对象中，了解了这些，我们再次回到<code>InvocationHandler.invoke()</code>方法中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">ServiceMethod serviceMethod = loadServiceMethod(method);</div><div class="line">OkHttpCall okHttpCall = <span class="keyword">new</span> OkHttpCall&lt;&gt;(serviceMethod, args);</div><div class="line"><span class="keyword">return</span> serviceMethod.callAdapter.adapt(okHttpCall);</div></pre></td></tr></table></figure>
+<p>我们看到，<code>serviceMethod</code>对象又被传入了<code>OKHttpCall</code>的构造函数中，看来，我们已经非常接近OKHttp中熟悉的 <strong>Call</strong> 对象了，点进<code>OKHttpCall</code>类，我们发现这家伙就继承自 <strong>Call</strong>，于是我们找到这个方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> Request <span class="title">request</span><span class="params">()</span> </span>&#123;</div><div class="line">    okhttp3.Call call = rawCall;</div><div class="line">    <span class="keyword">if</span> (call != <span class="keyword">null</span>) &#123;</div><div class="line">      <span class="keyword">return</span> call.request();</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> (creationFailure != <span class="keyword">null</span>) &#123;</div><div class="line">      <span class="keyword">if</span> (creationFailure <span class="keyword">instanceof</span> IOException) &#123;</div><div class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"Unable to create request."</span>, creationFailure);</div><div class="line">      &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">throw</span> (RuntimeException) creationFailure;</div><div class="line">      &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">      <span class="keyword">return</span> (rawCall = createRawCall()).request();</div><div class="line">    &#125; <span class="keyword">catch</span> (RuntimeException e) &#123;</div><div class="line">      creationFailure = e;</div><div class="line">      <span class="keyword">throw</span> e;</div><div class="line">    &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">      creationFailure = e;</div><div class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"Unable to create request."</span>, e);</div><div class="line">    &#125;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<p>OKHttp网络请求的第一步就是建造一个<code>Request</code>对象，看来上面的方法就是来做这件事儿的，抛开层层 <strong>try-catch</strong>，我们看到实际上两个 <strong>return</strong> 都落到了<code>createRawCall()).request()</code>上，找到该方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">private</span> okhttp3.<span class="function">Call <span class="title">createRawCall</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">    Request request = serviceMethod.toRequest(args);</div><div class="line">    okhttp3.Call call = serviceMethod.callFactory.newCall(request);</div><div class="line">    <span class="keyword">if</span> (call == <span class="keyword">null</span>) &#123;</div><div class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException(<span class="string">"Call.Factory returned null."</span>);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> call;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<p><code>serviceMethod</code>正是我们从构造方法中得到的，再点进<code>toRequest()</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="function">Request <span class="title">toRequest</span><span class="params">(Object... args)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">    RequestBuilder requestBuilder = <span class="keyword">new</span> RequestBuilder(httpMethod, baseUrl, relativeUrl, headers,</div><div class="line">        contentType, hasBody, isFormEncoded, isMultipart);</div><div class="line"></div><div class="line">    <span class="meta">@SuppressWarnings</span>(<span class="string">"unchecked"</span>) <span class="comment">// It is an error to invoke a method with the wrong arg types.</span></div><div class="line">    ParameterHandler&lt;Object&gt;[] handlers = (ParameterHandler&lt;Object&gt;[]) parameterHandlers;</div><div class="line"></div><div class="line">    <span class="keyword">int</span> argumentCount = args != <span class="keyword">null</span> ? args.length : <span class="number">0</span>;</div><div class="line">    <span class="keyword">if</span> (argumentCount != handlers.length) &#123;</div><div class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"Argument count ("</span> + argumentCount</div><div class="line">          + <span class="string">") doesn't match expected count ("</span> + handlers.length + <span class="string">")"</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> p = <span class="number">0</span>; p &lt; argumentCount; p++) &#123;</div><div class="line">      handlers[p].apply(requestBuilder, args[p]);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">return</span> requestBuilder.build();</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<p>没错，我们终于找到了<code>RequestBuilder</code>这个家伙，再看看它的参数，正是我们最开始构造<code>ServiceMethod</code>对象时从<code>Method</code>中总结得到的那些信息，因此可以这样说<code>ServiceMethod</code>不仅为我们存储了HTTP API方法信息，它同时为我们构建了 <strong>OKHttp Request</strong> 对象。</p>
+<p>然而 <strong>Request</strong> 对象并不是可观察的数据流(构建它的信息全部是编译期确定量)，因此我们依然需要 <strong>Call</strong> 来进行下一步操作。回到代码，最终也正是如此，最终我们得到了一个<code>OkHttpCall</code>对象，其中包含了相应的 <strong>Request</strong> 信息。</p>
+<h2 id="链式调用巧妙连接RxJava"><a href="#链式调用巧妙连接RxJava" class="headerlink" title="链式调用巧妙连接RxJava"></a>链式调用巧妙连接RxJava</h2><p>如果你看过Retrofit1的源码，就会发现<code>Retrofit.create()</code>方法和现在有所不同，最主要的差别就是<code>InvocationHandler.invoke()</code>原先直接返回一个 <strong>Call</strong> 对象，而现在则是返回了这样一个东西：</p>
+<p><code>return serviceMethod.callAdapter.adapt(okHttpCall);</code></p>
+<p>首先，我们先来假设一下，之前说到过，在接口<code>GitHubService</code>调用<code>listRepos</code>方法时，实际上会执行<code>InvocationHandler.invoke()</code>方法，而最开始我在 <strong>Demo</strong> 中也提醒大家，我将会把 <code>listRepos</code> 方法的返回对象由 <strong>Call</strong> 改为 <strong>Observable</strong>，那么不难推测，这个<code>serviceMethod.callAdapter.adapt()</code>方法很有可能就是返回一个 <strong>Observable</strong> 对象。按照这个思路，我们来看一看源码。</p>
+<p>首先点进变量<code>callAdapter</code>，不难发现，其是在<code>ServiceMethod.Builder</code>中被初始化的，找到<code>Builder.build()</code>方法，第一句就是<code>createCallAdapter()</code>:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">private</span> CallAdapter&lt;?&gt; createCallAdapter() &#123;</div><div class="line">      Type returnType = method.getGenericReturnType();</div><div class="line">      <span class="keyword">if</span> (Utils.hasUnresolvableType(returnType)) &#123;</div><div class="line">        <span class="keyword">throw</span> methodError(</div><div class="line">            <span class="string">"Method return type must not include a type variable or wildcard: %s"</span>, returnType);</div><div class="line">      &#125;</div><div class="line">      <span class="keyword">if</span> (returnType == <span class="keyword">void</span>.class) &#123;</div><div class="line">        <span class="keyword">throw</span> methodError(<span class="string">"Service methods cannot return void."</span>);</div><div class="line">      &#125;</div><div class="line">      Annotation[] annotations = method.getAnnotations();</div><div class="line">      <span class="keyword">try</span> &#123;</div><div class="line">        <span class="keyword">return</span> retrofit.callAdapter(returnType, annotations);</div><div class="line">      &#125; <span class="keyword">catch</span> (RuntimeException e) &#123; <span class="comment">// Wide exception range because factories are user code.</span></div><div class="line">        <span class="keyword">throw</span> methodError(e, <span class="string">"Unable to create call adapter for %s"</span>, returnType);</div><div class="line">      &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p>直接看到第十二行返回值，一个Retrofit引用调用了<code>callAdapter()</code>方法，二话不说点进去瞧瞧：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> CallAdapter&lt;?&gt; callAdapter(Type returnType, Annotation[] annotations) &#123;</div><div class="line">    <span class="keyword">return</span> nextCallAdapter(<span class="keyword">null</span>, returnType, annotations);</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<p>别忘了句柄是一个Retrofit引用对象哦(其实就是构建<code>ServiceMethod</code>时传入的 <strong>this</strong>)，我们已经回到Retrofit类,在点进<code>nextCallAdapter()</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> CallAdapter&lt;?&gt; nextCallAdapter(CallAdapter.Factory skipPast, Type returnType,</div><div class="line">      Annotation[] annotations) &#123;</div><div class="line">    checkNotNull(returnType, <span class="string">"returnType == null"</span>);</div><div class="line">    checkNotNull(annotations, <span class="string">"annotations == null"</span>);</div><div class="line"></div><div class="line">    <span class="keyword">int</span> start = adapterFactories.indexOf(skipPast) + <span class="number">1</span>;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = start, count = adapterFactories.size(); i &lt; count; i++) &#123;</div><div class="line">      CallAdapter&lt;?&gt; adapter = adapterFactories.get(i).get(returnType, annotations, <span class="keyword">this</span>);</div><div class="line">      <span class="keyword">if</span> (adapter != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">return</span> adapter;</div><div class="line">      &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    StringBuilder builder = <span class="keyword">new</span> StringBuilder(<span class="string">"Could not locate call adapter for "</span>)</div><div class="line">        .append(returnType)</div><div class="line">        .append(<span class="string">".\n"</span>);</div><div class="line">    <span class="keyword">if</span> (skipPast != <span class="keyword">null</span>) &#123;</div><div class="line">      builder.append(<span class="string">"  Skipped:"</span>);</div><div class="line">      <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; start; i++) &#123;</div><div class="line">        builder.append(<span class="string">"\n   * "</span>).append(adapterFactories.get(i).getClass().getName());</div><div class="line">      &#125;</div><div class="line">      builder.append(<span class="string">'\n'</span>);</div><div class="line">    &#125;</div><div class="line">    builder.append(<span class="string">"  Tried:"</span>);</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = start, count = adapterFactories.size(); i &lt; count; i++) &#123;</div><div class="line">      builder.append(<span class="string">"\n   * "</span>).append(adapterFactories.get(i).getClass().getName());</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(builder.toString());</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<p>这个方法比较长，不过我们不难发现，它的作用就是希望返回一个 <strong>adapter</strong> 对象，注意第六到第十二行，<code>skipPast</code>由上文可知为 <strong>null</strong>，因此<code>start</code>为 <strong>0</strong>。进入循环，遍历<code>adapterFactories</code>，一旦获得非空 <strong>adapter</strong> 就立即返回。我们搜索<br><code>adapterFactories</code>，找到它的赋值语句：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> Builder <span class="title">addCallAdapterFactory</span><span class="params">(CallAdapter.Factory factory)</span> </span>&#123;</div><div class="line">      adapterFactories.add(checkNotNull(factory, <span class="string">"factory == null"</span>));</div><div class="line">      <span class="keyword">return</span> <span class="keyword">this</span>;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p>这个方法眼熟吗？回到我们的 <strong>Demo</strong> 中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Retrofit  retrofit = <span class="keyword">new</span> Retrofit.Builder()</div><div class="line">                .addConverterFactory(GsonConverterFactory.create())<span class="comment">//添加Gson作为序列化工具</span></div><div class="line">                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())<span class="comment">//添加RxJava Adapter</span></div><div class="line">                .baseUrl(<span class="string">"your API host"</span>)</div><div class="line">                .build();</div></pre></td></tr></table></figure>
+<p>注意第三行，原来我们在建造Retrofit对象的时候链式调用了这个方法，传入了一个<code>CallAdapter.Factory</code>对象，顾名思义，这个东西就和RxJava建立了关系。我们不妨进入<code>RxJava2CallAdapterFactory</code>工厂类，其继承自<code>CallAdapter.Factory</code>，根据直觉，我们迅速阅读代码，找到<code>RxJava2CallAdapter</code>类，点击进入，果然没错，这个类继承自<code>CallAdapter</code>，也就是上文<code>ServiceMethod.callAdapter</code>的类型。因此这里的<code>ServiceMethod.callAdapter</code>事实上通过<code>addCallAdapterFactory</code>方法及以后的一系列调用，被指向了一个<code>RxJava2CallAdapter</code>对象。</p>
+<p>至此，我们只需要进入<code>RxJava2CallAdapter</code>类，查找接口方法<code>adapt()</code>的实现就行了：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span> <span class="keyword">public</span> &lt;R&gt; <span class="function">Object <span class="title">adapt</span><span class="params">(Call&lt;R&gt; call)</span> </span>&#123;</div><div class="line">    Observable&lt;Response&lt;R&gt;&gt; responseObservable = <span class="keyword">new</span> CallObservable&lt;&gt;(call);</div><div class="line"></div><div class="line">    Observable&lt;?&gt; observable;</div><div class="line">    <span class="keyword">if</span> (isResult) &#123;</div><div class="line">      observable = <span class="keyword">new</span> ResultObservable&lt;&gt;(responseObservable);</div><div class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (isBody) &#123;</div><div class="line">      observable = <span class="keyword">new</span> BodyObservable&lt;&gt;(responseObservable);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">      observable = responseObservable;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (scheduler != <span class="keyword">null</span>) &#123;</div><div class="line">      observable = observable.subscribeOn(scheduler);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (isFlowable) &#123;</div><div class="line">      <span class="keyword">return</span> observable.toFlowable(BackpressureStrategy.LATEST);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> (isSingle) &#123;</div><div class="line">      <span class="keyword">return</span> observable.singleOrError();</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> (isMaybe) &#123;</div><div class="line">      <span class="keyword">return</span> observable.singleElement();</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> (isCompletable) &#123;</div><div class="line">      <span class="keyword">return</span> observable.ignoreElements();</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> observable;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<p>从<code>RxJava2CallAdapterFactory</code>的<code>get()</code>(太长不贴了)中可以看到，默认情况下，<strong>if条件</strong> 下返回的情况全是 <strong>false</strong>(由于其他对象返回值涉及到Rx具体的RxJava知识，这里不做介绍)，因此我们可以看到最终这个<code>adapt()</code>方法果然返回了一个<code>Observable</code>对象。我们再来看看这个对象做了什么，第二行<code>CallObservable</code>类，看到了熟悉的<code>subscribeActual()</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span> <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">subscribeActual</span><span class="params">(Observer&lt;? <span class="keyword">super</span> Response&lt;T&gt;&gt; observer)</span> </span>&#123;</div><div class="line">    <span class="comment">// Since Call is a one-shot type, clone it for each new observer.</span></div><div class="line">    Call&lt;T&gt; call = originalCall.clone();</div><div class="line">    observer.onSubscribe(<span class="keyword">new</span> CallDisposable(call));</div><div class="line"></div><div class="line">    <span class="keyword">boolean</span> terminated = <span class="keyword">false</span>;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">      Response&lt;T&gt; response = call.execute();</div><div class="line">      <span class="keyword">if</span> (!call.isCanceled()) &#123;</div><div class="line">        observer.onNext(response);</div><div class="line">      &#125;</div><div class="line">      <span class="keyword">if</span> (!call.isCanceled()) &#123;</div><div class="line">        terminated = <span class="keyword">true</span>;</div><div class="line">        observer.onComplete();</div><div class="line">      &#125;</div><div class="line">    &#125; <span class="keyword">catch</span> (Throwable t) &#123;</div><div class="line">      Exceptions.throwIfFatal(t);</div><div class="line">      <span class="keyword">if</span> (terminated) &#123;</div><div class="line">        RxJavaPlugins.onError(t);</div><div class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!call.isCanceled()) &#123;</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">          observer.onError(t);</div><div class="line">        &#125; <span class="keyword">catch</span> (Throwable inner) &#123;</div><div class="line">          Exceptions.throwIfFatal(inner);</div><div class="line">          RxJavaPlugins.onError(<span class="keyword">new</span> CompositeException(t, inner));</div><div class="line">        &#125;</div><div class="line">      &#125;</div><div class="line">    &#125;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<p>这是每个继承自<code>Observable</code>类必须实现的方法，在其中可以操作<code>observer</code>回调函数，我们看到在 <strong>try块</strong> 的第一行，<code>Call.execute()</code>返回了<code>Response</code>对象，至此，我们得到了可观察对象数据。Retrofit或者说OKHttp的所有任务结果，将交给RxJava作进一步处理。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>至此，Retrofit2的一些最基本的东西算是涵盖到了，当然，这框架之所以那么受人喜爱，自然有其方便，强大的地方，希望以后有时间能够继续深入研究。</p>
+<p>第一次写读源码的东西，感觉真的有太多知识要学习，希望以后能将一些主流的android，甚至iOS框架全看一看。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/06/18/kotlin在android-UI绑定中的使用/" rel="next" title="kotlin在android UI绑定中的使用">
+                <i class="fa fa-chevron-left"></i> kotlin在android UI绑定中的使用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/wxj.jpg"
+               alt="Rocinante" />
+          <p class="site-author-name" itemprop="name">Rocinante</p>
+           
+              <p class="site-description motion-element" itemprop="description">app前端 Java kotlin swift</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/WangXingjian" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#官方Demo"><span class="nav-number">1.</span> <span class="nav-text">官方Demo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Retrofit伪动态代理"><span class="nav-number">2.</span> <span class="nav-text">Retrofit伪动态代理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#隐藏OKHttp-Call组装过程"><span class="nav-number">3.</span> <span class="nav-text">隐藏OKHttp Call组装过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#链式调用巧妙连接RxJava"><span class="nav-number">4.</span> <span class="nav-text">链式调用巧妙连接RxJava</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小结"><span class="nav-number">5.</span> <span class="nav-text">小结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Rocinante</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
