@@ -111,7 +111,7 @@
 <meta property="og:url" content="http://yoursite.com/2017/06/18/kotlin在android-UI绑定中的使用/index.html">
 <meta property="og:site_name" content="Rocinante的Blog">
 <meta property="og:description" content="作为一个android开发者，刚刚学习kotlin，往往格外关注其在已有android体系下的应用效果。这篇文章，主要分享一下自己学习kotlin有关UI绑定的技巧。 Kotlin Android Extensions说实话，我本人第一次接触这个东西还是有点不习惯。然而，从现代语言精简代码量的角度想，Kotlin Android Extensions势必将成为以后的趋势。 话不多说，如果你想在自己">
-<meta property="og:updated_time" content="2017-06-18T09:11:14.000Z">
+<meta property="og:updated_time" content="2017-06-18T09:12:28.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="kotlin在android UI绑定中的使用">
 <meta name="twitter:description" content="作为一个android开发者，刚刚学习kotlin，往往格外关注其在已有android体系下的应用效果。这篇文章，主要分享一下自己学习kotlin有关UI绑定的技巧。 Kotlin Android Extensions说实话，我本人第一次接触这个东西还是有点不习惯。然而，从现代语言精简代码量的角度想，Kotlin Android Extensions势必将成为以后的趋势。 话不多说，如果你想在自己">
@@ -123,7 +123,7 @@
   var CONFIG = {
     root: '/',
     scheme: 'Pisces',
-    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":true,"scrollpercent":false},
     fancybox: true,
     motion: true,
     duoshuo: {
@@ -358,7 +358,7 @@
 <figure class="highlight kotlin"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">private</span> <span class="keyword">var</span> btn: Button</div></pre></td></tr></table></figure>
 <p>可是别忘了，我们需要在声明不可空变量时初始化它，因此代码应该是这样：<br><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">private</span> <span class="keyword">var</span> btn: Button = findViewById(R.id.btn) <span class="keyword">as</span> Button</div></pre></td></tr></table></figure></p>
 <p>那么问题又来了，这段话虽然编译不会报错，但是我们都知道，在<code>setContentView()</code>之前调用<code>findViewById()</code>方法是不行的。<br>这就陷入了矛盾之中，难道没有更好的解决办法吗？</p>
-<p>上周我将这个问题放到了[stackoverflow] (<a href="https://stackoverflow.com/questions/44450816/nullpointerexception-in-kotlin)上，果然得到了满意的答案。也怪自己看文档不够仔细，遇到以上情况，也就是需要在类内声明不可空变量，然后在之后的方法中初始化它们的情况，我们其实可以用kotlin关键字``lateinit``修饰变量" target="_blank" rel="external">https://stackoverflow.com/questions/44450816/nullpointerexception-in-kotlin)上，果然得到了满意的答案。也怪自己看文档不够仔细，遇到以上情况，也就是需要在类内声明不可空变量，然后在之后的方法中初始化它们的情况，我们其实可以用kotlin关键字``lateinit``修饰变量</a>:</p>
+<p>上周我将这个问题放到了<a href="https://stackoverflow.com/questions/44450816/nullpointerexception-in-kotlin" target="_blank" rel="external">stackoverflow</a>上，果然得到了满意的答案。也怪自己看文档不够仔细，遇到以上情况，也就是需要在类内声明不可空变量，然后在之后的方法中初始化它们的情况，我们其实可以用kotlin关键字<code>lateinit</code>修饰变量:</p>
 <figure class="highlight kotlin"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">private</span> <span class="keyword">lateinit</span> <span class="keyword">var</span> btn : Button</div><div class="line">   <span class="keyword">override</span> <span class="function"><span class="keyword">fun</span> <span class="title">onCreate</span><span class="params">(savedInstanceState: <span class="type">Bundle</span>?)</span></span> &#123;</div><div class="line">       <span class="keyword">super</span>.onCreate(savedInstanceState)</div><div class="line">       setContentView(R.layout.activity_demo)</div><div class="line">       btn = findViewById(R.id.btn) <span class="keyword">as</span> Button</div><div class="line">       btn.text = <span class="string">"btn"</span></div><div class="line">   &#125;</div></pre></td></tr></table></figure>
 <p>这样的代码看得那叫一个舒心，<code>lateinit</code>有点像一个逻辑稍有不同的简化版<strong>懒加载</strong>，不过需要注意的是，使用<code>lateinit</code>关键字，虽然避免了初始化紧跟声明和冗余空校验的问题，但是如果你的代码稍有问题，如没有初始化就使用变量，那么一样会导致另一个报错：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">kotlin.UninitializedPropertyAccessException: lateinit property btn has not been initialized</div></pre></td></tr></table></figure>
@@ -399,8 +399,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/06/16/mdexe/" rel="next" title="mdexe">
-                <i class="fa fa-chevron-left"></i> mdexe
+              <a href="/2017/06/15/wxj-first-blog/" rel="next" title="wxj first blog">
+                <i class="fa fa-chevron-left"></i> wxj first blog
               </a>
             
           </div>
@@ -479,7 +479,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives/">
-                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-count">2</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -538,6 +538,11 @@
       
 
       
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+        </div>
+      
 
     </div>
   </aside>
@@ -578,11 +583,6 @@
       </div>
     </footer>
 
-    
-      <div class="back-to-top">
-        <i class="fa fa-arrow-up"></i>
-        
-      </div>
     
 
   </div>
